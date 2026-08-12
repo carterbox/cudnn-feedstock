@@ -1,0 +1,2 @@
+cuda_arch_min:
+  - 7.5
