@@ -4,3 +4,5 @@
 # CUDA 13.4 and newer, so that is the version pinned here.
 cuda_compiler_version:  # [win and arm64]
   - '13.4'              # [win and arm64]
+cuda_arch_min:
+  - 7.5
