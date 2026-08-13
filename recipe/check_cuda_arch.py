@@ -5,7 +5,7 @@ the architecture the recipe claims to support.
 Usage:
     python check_cuda_arch.py <file-or-glob> [<file-or-glob> ...]
 
-The expected architecture is read from the ``cuda_arch_min`` environment variable (dotted,
+The expected architecture is read from the ``cuda_arch_version`` environment variable (dotted,
 e.g. ``8.2``) unless ``--arch-min`` is given.  ``cuobjdump`` must be on PATH.
 
 The minimum for the group is the highest of the per-file minimums: a GPU below that
@@ -101,18 +101,18 @@ def main(argv=None):
     )
     parser.add_argument(
         "--arch-min",
-        default=os.environ.get("cuda_arch_min"),
-        help="expected minimum architecture, dotted (default: $cuda_arch_min)",
+        default=os.environ.get("cuda_arch_version"),
+        help="expected minimum architecture, dotted (default: $cuda_arch_version)",
     )
     args = parser.parse_args(argv)
 
     if not args.arch_min:
-        parser.error("cuda_arch_min is not set and --arch-min was not given")
+        parser.error("cuda_arch_version is not set and --arch-min was not given")
 
     expected = parse_arch(args.arch_min)
     if expected is None:
         parser.error(
-            'cuda_arch_min must look like 8.2, got "{}"'.format(args.arch_min)
+            'cuda_arch_version must look like 8.2, got "{}"'.format(args.arch_min)
         )
 
     cuobjdump = shutil.which("cuobjdump")
@@ -124,7 +124,7 @@ def main(argv=None):
         parser.error("no files matched")
 
     print(
-        "Checking CUDA architectures against cuda_arch_min={}".format(args.arch_min)
+        "Checking CUDA architectures against cuda_arch_version={}".format(args.arch_min)
     )
 
     failed = False
