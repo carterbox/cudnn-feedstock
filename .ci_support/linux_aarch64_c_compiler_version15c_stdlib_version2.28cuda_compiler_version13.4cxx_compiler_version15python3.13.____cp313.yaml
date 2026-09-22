@@ -12,10 +12,12 @@ channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
+cuda_arch_version:
+- '7.5'
 cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
-- '13.0'
+- '13.4'
 cudnn:
 - '9'
 cxx_compiler:
@@ -24,6 +26,12 @@ cxx_compiler_version:
 - '15'
 docker_image:
 - quay.io/condaforge/linux-anvil-aarch64:alma10
+pin_run_as_build:
+  python:
+    min_pin: x.x
+    max_pin: x.x
+python:
+- 3.13.* *_cp313
 target_platform:
 - linux-aarch64
 xz:
