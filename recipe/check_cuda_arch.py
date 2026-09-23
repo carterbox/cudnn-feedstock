@@ -1,17 +1,21 @@
 #!/usr/bin/env python
-"""Check that the lowest CUDA architecture built into a set of binaries matches
-the architecture the recipe claims to support.
+"""Check that ``cuda_arch_version`` matches the lowest common CUDA architecture across a
+set of binaries.
 
 Usage:
     python check_cuda_arch.py <file-or-glob> [<file-or-glob> ...]
 
-The expected architecture is read from the ``cuda_arch_version`` environment variable (dotted,
-e.g. ``8.2``) unless ``--arch-min`` is given.  ``cuobjdump`` must be on PATH.
+The "lowest common CUDA architecture" is the lowest architecture that every binary in the
+set still supports — not the lowest architecture present in any single binary. A binary
+that happens to also carry kernels for older GPUs than the rest of the group does not lower
+this value: the group as a whole cannot run on a GPU that any one of its binaries doesn't
+support, so the floor is the highest of the per-file minimums, not the lowest.
 
-The minimum for the group is the highest of the per-file minimums: a GPU below that
-architecture cannot run at least one of the binaries, so the group as a whole does not
-support it.  A file that happens to carry kernels for older GPUs than the rest therefore
-does not drag the floor down.
+The expected architecture is read from the ``cuda_arch_version`` environment variable
+(dotted, e.g. ``8.2``) unless ``--arch-min`` is given.  ``cuobjdump`` must be on PATH. The
+check fails if ``cuda_arch_version`` does not exactly match the computed lowest common
+architecture, in either direction: too low means the recipe under-claims what the binaries
+actually require; too high means the recipe claims support the binaries don't actually have.
 
 Both SASS (``sm_XX``) and PTX (``compute_XX``) targets count; arch-conditional targets
 (``sm_90a``, ``sm_100f``) count as their base architecture. Files without device code are
@@ -159,11 +163,11 @@ def main(argv=None):
 
     # The group is only usable on a GPU that every binary supports, so the floor
     # is the highest of the per-file minimums, not the lowest.
-    minimum, minimum_path = max(found, key=lambda item: item[0])
+    minimum, _ = max(found, key=lambda item: item[0])
 
     print(
-        "minimum = {} (set by {})   expected = {}".format(
-            format_arch(minimum), minimum_path, format_arch(expected)
+        "lowest common arch = {}   expected = {}".format(
+            format_arch(minimum), format_arch(expected)
         )
     )
 
@@ -173,7 +177,7 @@ def main(argv=None):
 
     if minimum != expected:
         print(
-            "FAILED: minimum supported architecture is {}, expected {}".format(
+            "FAILED: lowest common CUDA architecture is {}, expected {}".format(
                 format_arch(minimum), format_arch(expected)
             )
         )
